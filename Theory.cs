@@ -252,3 +252,186 @@ namespace _4th_Lab
         }
     }
 }
+
+
+
+
+namespace course_work
+{
+    class Processing: Derivative_methods
+    {
+        public string Process(string function)
+        {
+            function = function.Replace(" ", "");
+            string[] parts = function.Split('*');
+
+            if (parts.Length == 2 && function.Contains("^") == false)
+                if (Double.TryParse(parts[0], out double constant) && Double.TryParse(parts[parts.Length - 1], out double constant1) == false)
+                    return parts[0];
+
+            if (function.Contains("^"))
+            {
+                if (Char.IsNumber(function, function.Length - 1))
+                    return Constant_degree(function);
+                else if (function[0] != 'e')
+                    return Variable_degree(function);
+                else
+                    return function;
+            }
+            else if (Double.TryParse(function, out double check3))
+            {
+                return Constant();
+            }
+            else if (function.Length == 1)
+            {
+                return "1";
+            }
+            else if (function.Length == 2 && function[0] == '-')
+            {
+                return "-1";
+            }
+            else
+            {
+                function = function.Replace("(", "");
+                function = function.Replace(")", "");
+
+                bool flag = false;
+                if (function[0] == '-')
+                    flag = true;
+                function = function.Replace("-", "");
+
+                string function_name = function.Substring(0, function.Length - 1);
+
+                if (function_name == "ln")
+                    return Ln(function);
+                else if (function_name == "sin")
+                    return Sin(function, flag);
+                else if (function_name == "cos")
+                    return Cos(function, flag);
+                else if (function_name == "tg")
+                    return Tg(function, flag);
+                else if ((function_name == "ctg"))
+                    return Ctg(function, flag);
+                else
+                    return "Ошибка";
+            }
+        }
+    }
+
+
+    class Derivative_methods
+    {
+        // for a = const
+        public string Constant()
+        {
+            return "0";
+        }
+
+        // for a*x^n, a,n = const
+        public string Constant_degree(string variable)
+        {
+            string[] string_degrees = variable.Split('^');
+
+            if (string_degrees[string_degrees.Length - 1] == "1" && variable.Contains("*"))
+                return string_degrees[0];
+            else if (string_degrees[string_degrees.Length - 1] == "1")
+                return "1";
+
+            
+            double degree = double.Parse(string_degrees[string_degrees.Length - 1]);
+
+            string[] string_variable = string_degrees[0].Split('*');
+            double constant = 1;
+            string letter = "error";
+            if (string_variable.Length > 1)
+            {
+                for (int i = 0; i < string_variable.Length; i++)
+                {
+                    try { constant = constant * double.Parse(string_variable[i]); }
+                    catch { letter = string_variable[i]; }
+                }
+                constant = constant * degree;
+                string_degrees[0] = string.Concat(constant, " * ", letter);
+            }
+            else
+            {
+                letter = string_variable[0];
+                string_degrees[0] = string.Concat(degree, " * ", letter);
+            }
+            string_degrees[string_degrees.Length - 1] = Convert.ToString(degree - 1);
+
+            if (constant == 0)
+                return "";
+            else if (degree - 1 != 0 && degree - 1 != 1)
+                return string.Join("^", string_degrees);
+            else if (degree - 1 == 1)
+            {
+                Array.Resize(ref string_degrees, string_degrees.Length - 1);
+                return string.Join("^", string_degrees);
+            }
+            else
+                return "1";
+        }
+
+        // for a^x, a = const
+        public string Variable_degree(string variable) 
+        {
+            string[] string_degrees = variable.Split('^');
+
+            return string.Concat(variable, " * ", $"ln({string_degrees[string_degrees.Length - 1]})");
+        }
+
+        // for ln(x) or lnx
+        public string Ln(string function)
+        {
+            char variable = function[2];
+
+            if (function[0] == '-')
+                return $"- 1/{variable}";
+            else 
+                return $"1/{variable}";
+        }
+
+        // for sin(x) or sinx
+        public string Sin(string function, bool flag)
+        {
+            char variable = function[3];
+
+            if (flag)
+                return $"- cos({variable})";
+            else
+                return $"cos({variable})";
+        }
+
+        // for cos(x) or cosx
+        public string Cos(string function, bool flag)
+        {
+            char variable = function[3];
+
+            if (flag)
+                return $"sin({variable})";
+            else
+                return $"- sin({variable})";
+        }
+        // for tg(x) or tgx
+        public string Tg(string function, bool flag)
+        {
+            char variable = function[2];
+
+            if (flag)
+                return $"- 1/cos({variable})^2";
+            else
+                return $"1/cos({variable})^2";
+        }
+        // for ctg(x) or ctgx
+        public string Ctg(string function, bool flag)
+        {
+            char variable = function[3];
+
+            if (flag)
+                return $"1/(sin({variable}))^2";
+            else 
+                return $"- 1/(sin({variable}))^2";
+        }
+    }
+}
